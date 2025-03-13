@@ -1,126 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Computer Science Report Examination Number 0000000</title>
-    <link rel="stylesheet" type="text/css" href="report.css">
-    <script src="report.js" defer></script>
-</head>
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDczW3d0RbphdiXQHzjS8rAQrUGNku0iYc",
+    authDomain: "birds-2b89b.firebaseapp.com",
+    databaseURL: "https://birds-2b89b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "birds-2b89b",
+    storageBucket: "birds-2b89b.firebasestorage.app",
+    messagingSenderId: "179072348631",
+    appId: "1:179072348631:web:64e6bc3e5ca763cf98db92",
+    measurementId: "G-6NGMSSL7PP"
+};
 
-<body>
-    <div class="header">
-        <div class="header-img">
-        </div>
-    </div>
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const dbcon = firebase.database().ref('/userBird/');
+let birdStrikesData = [];
 
-    <div id="navcontainer">
-        <ul id="navlist">
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="brhome.html">BR3</a></li>
-            <li><a href="graphing.html">AR1</a></li>
-            <li><a href="bird_maker.html">AR2 & AR3</a></li>
-        </ul>
-    </div>
+// Fetch bird strike data
+fetch('bird_strikes.json')
+    .then(response => response.json())
+    .then(data => {
+        birdStrikesData = data;
+        console.log("Bird strike data loaded:", birdStrikesData);
+        showTable2();
+    })
+    .catch(error => console.error("Error loading bird strike data:", error));
 
-    <section id="main">
-        <h1 id="title">Computer Science Project 2025</h1>
-        <h1 id="title">Name of Project</h1>
-        <h1 id="title">Exam Number: 258530</h1>
-        <div id="pheading"></div>
+// Save data to Firebase
+document.getElementById("sendToFb").addEventListener("click", saveData);
 
-        <div class="fcon">
-            <form>
-                <center>
-                    <label for="name">User Name</label>
-                    <input type="text" id="name" name="name" placeholder="TYPE HERE..." required>
-                    <br><br>
+function saveData() {
+    let nameValue = document.getElementById("name").value.trim();
+    let breedFieldVal = document.getElementById("breed").value.trim();
+    let sizeFieldVal = document.getElementById("size").value.trim();
+    let cloudFieldVal = document.getElementById("cloud").value.trim();
+    
+    let airlines = [];
+    for (let i = 1; i <= 5; i++) {
+        let checkbox = document.getElementById(`al${i}`);
+        if (checkbox && checkbox.checked) {
+            airlines.push(checkbox.value);
+            checkbox.checked = false;
+        }
+    }
 
-                    <label for="breed">Breed:</label>
-                    <select id="breed" required>
-                        <option value="">Select Breed</option>
-                        <option value="Mourning dove">Mourning dove</option>
-                        <option value="Canada goose">Canada goose</option>
-                        <option value="European starling">European starling</option>
-                        <option value="Killdeer">Killdeer</option>
-                        <option value="Rock pigeon">Rock pigeon</option>
-                        <option value="Barn swallow">Barn swallow</option>
-                        <option value="Red-tailed hawk">Red-tailed hawk</option>
-                        <option value="Ring-billed gull">Ring-billed gull</option>
-                        <option value="House sparrow">House sparrow</option>
-                        <option value="American kestrel">American kestrel</option>
-                    </select>
+    if (!nameValue || !breedFieldVal || !sizeFieldVal) {
+        alert("Please fill in all required fields.");
+        return;
+    }
 
-                    <label for="size">Size:</label>
-                    <select id="size" required>
-                        <option value="">Select Size</option>
-                        <option value="Small">Small</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Large">Large</option>
-                    </select>
-                    <br><br>
+    let data = { Name: nameValue, Breed: breedFieldVal, Size: sizeFieldVal, Airlines: airlines, Clouds: cloudFieldVal };
 
-                    <p>Choose the airlines that you would consider flying with:</p>
-                    <input type="checkbox" id="al1" name="al1" value="SOUTHWEST AIRLINES">
-                    <label for="al1">Southwest Airlines</label>
-                    <input type="checkbox" id="al2" name="al2" value="BUSINESS">
-                    <label for="al2">Business</label>
-                    <input type="checkbox" id="al3" name="al3" value="AMERICAN AIRLINES">
-                    <label for="al3">American Airlines</label>
-                    <input type="checkbox" id="al4" name="al4" value="DELTA AIR LINES">
-                    <label for="al4">Delta Airlines</label>
-                    <input type="checkbox" id="al5" name="al5" value="AMERICAN EAGLE AIRLINES">
-                    <label for="al5">American Eagle Airlines</label>
-                    <br><br>
+    dbcon.push(data)
+        .then(() => {
+            showTable1();
+            showTable2();
+        })
+        .catch(error => console.error("Error saving data: ", error));
+}
 
-                    <label for="cloud">Is the day you are choosing to fly on cloudy?:</label>
-                    <select id="cloud" required>
-                        <option value="">Select Yes/No</option>
-                        <option value="True">Yes</option>
-                        <option value="False">No</option>
-                    </select>
-                    <br>
-                    <button type="button" id="sendToFb">Submit Data</button>
-                </center>
+// Display Table 1 (Firebase Data)
+function showTable1() {
+    dbcon.once("value", snapshot => {
+        const data = snapshot.val();
+        console.log("Firebase Data:", data);
+        const tbody = document.getElementById("ar2data");
+        tbody.innerHTML = "";
+        
+        if (!data) return;
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Name</th>
-                            <th>Breed</th>
-                            <th>Size</th>
-                            <th>Airlines</th>
-                            <th>Clouds</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ar2data"></tbody>
-                </table>
-                <br>
-                <center>\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\</center>
-                <br>
-            </form>
-        </div>
-    </section>
+        for (let key in data) {
+            const row = data[key];
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${row.Name || "N/A"}</td><td>${row.Breed || "N/A"}</td><td>${row.Size || "N/A"}</td><td>${Array.isArray(row.Airlines) ? row.Airlines.join(", ") : "None"}</td><td>${row.Clouds || "N/A"}</td>`;
+            tbody.appendChild(tr);
+        }
+    });
+}
 
-    <blockquote>
-        <table>
-            <thead>
-                <tr>
-                    <th>User Name</th>
-                    <th>Safety Recommendations</th>
-                </tr>
-            </thead>
-            <tbody id="ar3data"></tbody>
-        </table>
-    </blockquote>
+// Display Table 2 (Recommendations)
+function showTable2() {
+    if (birdStrikesData.length === 0) {
+        console.warn("Bird strike data not loaded yet. Retrying...");
+        setTimeout(showTable2, 1000);
+        return;
+    }
 
-    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase.js"></script>
-    <script src="bird_maker.js" defer></script>
+    dbcon.once("value", snapshot => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("ar3data");
+        tbody.innerHTML = "";
+        
+        if (!data) return;
 
-    <section id="footer">
-        &copy; 258530
-    </section>
-</body>
-</html>
+        for (let key in data) {
+            const row = data[key];
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${row.Name || "N/A"}</td><td>${generateRecommendation(row.Breed, row.Size, row.Airlines, row.Clouds)}</td>`;
+            tbody.appendChild(tr);
+        }
+    });
+}
+
+// Generate Recommendations
+function generateRecommendation(breed, size, airlines, clouds) {
+    if (!birdStrikesData.length) return "Data not available";
+    if (!breed || typeof breed !== "string") return "Breed not specified.";
+
+    let relevantStrikes = birdStrikesData.filter(entry =>
+        entry.WildlifeSpecies && typeof entry.WildlifeSpecies === "string" &&
+        entry.WildlifeSpecies.trim().toLowerCase() === breed.trim().toLowerCase()
+    );
+
+    console.log("Searching for breed:", breed, "| Matches found:", relevantStrikes.length);
+
+    if (relevantStrikes.length === 0) {
+        return `No known risk for ${breed}.`;
+    }
+
+    relevantStrikes.sort((a, b) => b.Strikes - a.Strikes);
+    let highRiskAirports = relevantStrikes.slice(0, 3).map(entry => entry.AirportName || "Unknown");
+    let saferAirports = relevantStrikes.slice(-3).map(entry => entry.AirportName || "Unknown");
+
+    return `Avoid: ${highRiskAirports.join(", ")} | Prefer: ${saferAirports.join(", ")}`;
+}
+
+// Run on page load
+document.addEventListener("DOMContentLoaded", () => {
+    showTable1();
+    showTable2();
+});
 
 
