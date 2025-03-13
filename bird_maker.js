@@ -26,7 +26,7 @@ fetch('bird_strikes.json')
     })
     .then(data => {
         birdStrikesData = data;
-        console.log("Bird strike data loaded:", birdStrikesData);
+        console.log("Bird strike data loaded:", birdStrikesData); // Log the data
         showTable2(); // Only call showTable2 once data is loaded
     })
     .catch(error => {
@@ -38,14 +38,14 @@ document.getElementById("sendToFb").addEventListener("click", saveData);
 
 function saveData() {
     let nameValue = document.getElementById("name").value.trim();
-    let breedFieldVal = document.getElementById("breed").value.trim(); // Fixed typo: "breed" instead of "breed"
+    let breedFieldVal = document.getElementById("breed").value.trim();
     let sizeFieldVal = document.getElementById("size").value.trim();
     let cloudFieldVal = document.getElementById("cloud").value.trim();
     
     let airlines = [];
     for (let i = 1; i <= 5; i++) {
         let checkbox = document.getElementById(`al${i}`);
-        if (checkbox && checkbox.checked) { // Added null check for checkbox
+        if (checkbox && checkbox.checked) {
             airlines.push(checkbox.value);
             checkbox.checked = false;
         }
@@ -88,7 +88,7 @@ function showTable1() {
             const airlines = document.createElement("td");
             const clouds = document.createElement("td");
 
-            name.textContent = row.Name || "N/A"; // Added fallback for undefined values
+            name.textContent = row.Name || "N/A";
             breed.textContent = row.Breed || "N/A";
             size.textContent = row.Size || "N/A";
             airlines.textContent = Array.isArray(row.Airlines) ? row.Airlines.join(", ") : "None";
@@ -151,9 +151,13 @@ function generateRecommendation(breed, size, airlines, clouds) {
         return "Breed not specified.";
     }
 
+    console.log("Searching for breed:", breed); // Log the breed being searched
+
     let relevantStrikes = birdStrikesData.filter(entry =>
-        entry.species && entry.species.toLowerCase() === breed.toLowerCase()
+        entry.species && entry.species.trim().toLowerCase() === breed.trim().toLowerCase()
     );
+
+    console.log("Relevant strikes:", relevantStrikes); // Log the filtered results
 
     if (relevantStrikes.length === 0) {
         return "No known risk for this breed.";
@@ -171,7 +175,5 @@ document.addEventListener("DOMContentLoaded", () => {
     showTable1();
     showTable2(); // Ensure both tables are displayed once the page is ready
 });
-
-
 
 
