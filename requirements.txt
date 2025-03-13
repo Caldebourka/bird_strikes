@@ -1,6 +1,6 @@
 flask
 gunicorn
-firebase-admin
+firebase
 pygal
 pandas
 matplotlib
