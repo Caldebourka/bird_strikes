@@ -24,25 +24,29 @@ function displayChart() {
     let svgchart = document.getElementById("svgchart");
     let BirdInputBox = document.getElementById("bird_input-box");
     let CostInputBox = document.getElementById("cost_input-box");
-    let graphBox = document.getElementById("graphBox");  // Ensure you have this element
+    let graphBox = document.getElementById("graphBox"); 
 
     // Hide all elements initially
     chart.style.display = "none";
     svgchart.style.display = "none";
     BirdInputBox.style.display = "none";
     CostInputBox.style.display = "none";
-    if (graphBox) {
-        graphBox.style.display = "none"; // Hide graphBox by default
-    }
+    if (graphBox) graphBox.style.display = "none";
 
     // Display content based on the selected graph
     switch (graph) {
         case "choice":
-            break; // No need to display anything
+            break;
         case "1":
-            chart.style.display = "block";
-            chart.src = "1.png?t=" + new Date().getTime(); // Force refresh
-            BirdInputBox.style.display = "block";
+            fetch('/check_updates') // Call Flask to update the graph
+                .then(response => response.json())
+                .then(() => {
+                    chart.style.display = "block";
+                    chart.src = "static/graph.png?t=" + new Date().getTime(); // Updated graph
+                    BirdInputBox.style.display = "block";
+                    if (graphBox) graphBox.style.display = "block";
+                })
+                .catch(error => console.error("Error updating graph:", error));
             break;
         case "2":
             svgchart.style.display = "block";
@@ -50,16 +54,12 @@ function displayChart() {
             break;
         case "3":
             svgchart.style.display = "block";
-            svgchart.src = "Expensive_Strikes.svg"  ;
+            svgchart.src = "Expensive_Strikes.svg";
             CostInputBox.style.display = "block";
             break;
     }
-
-    // Finally, display the graphBox if it exists
-    if (graphBox) {
-        graphBox.style.display = "block";
-    }
 }
+
 
 let b_btn = document.getElementById("bird_n_btn");
 b_btn.addEventListener("click", bird_dataToFB);
