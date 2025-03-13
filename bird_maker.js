@@ -21,7 +21,7 @@ fetch('https://caldebourka.github.io/bird_strikes/')
     .then(data => {
         birdStrikesData = data;
         console.log("Bird strike data loaded:", birdStrikesData);
-        showTable2();
+        showTable2(); // Only call showTable2 once data is loaded
     })
     .catch(error => console.error("Error loading bird strike data:", error));
 	
