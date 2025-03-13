@@ -22,8 +22,7 @@ fetch('bird_strikes.json')
         birdStrikesData = data;
         console.log("Bird strike data loaded:", birdStrikesData);
         showTable2(); // Only call showTable2 once data is loaded
-    })
-    .catch(error => console.error("Error loading bird strike data:", error));
+    });
 	
 // Function to save data to Firebase
 document.getElementById("sendToFb").addEventListener("click", saveData);
