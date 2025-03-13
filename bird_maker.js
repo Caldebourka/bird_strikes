@@ -1,39 +1,31 @@
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDczW3d0RbphdiXQHzjS8rAQrUGNku0iYc",
-  authDomain: "birds-2b89b.firebaseapp.com",
-  databaseURL: "https://birds-2b89b-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "birds-2b89b",
-  storageBucket: "birds-2b89b.firebasestorage.app",
-  messagingSenderId: "179072348631",
-  appId: "1:179072348631:web:64e6bc3e5ca763cf98db92",
-  measurementId: "G-6NGMSSL7PP"
+    apiKey: "AIzaSyDczW3d0RbphdiXQHzjS8rAQrUGNku0iYc",
+    authDomain: "birds-2b89b.firebaseapp.com",
+    databaseURL: "https://birds-2b89b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "birds-2b89b",
+    storageBucket: "birds-2b89b.firebasestorage.app",
+    messagingSenderId: "179072348631",
+    appId: "1:179072348631:web:64e6bc3e5ca763cf98db92",
+    measurementId: "G-6NGMSSL7PP"
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const dbcon = firebase.database().ref('/userBird/');
-
 let birdStrikesData = [];
 
 // Fetch bird strike data
 fetch('bird_strikes.json')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Failed to load bird strike data");
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         birdStrikesData = data;
-        console.log("Bird strike data loaded:", birdStrikesData); // Log the data
-        showTable2(); // Only call showTable2 once data is loaded
+        console.log("Bird strike data loaded:", birdStrikesData);
+        showTable2();
     })
-    .catch(error => {
-        console.error("Error loading bird strike data:", error);
-    });
+    .catch(error => console.error("Error loading bird strike data:", error));
 
-// Function to save data to Firebase
+// Save data to Firebase
 document.getElementById("sendToFb").addEventListener("click", saveData);
 
 function saveData() {
@@ -61,106 +53,68 @@ function saveData() {
     dbcon.push(data)
         .then(() => {
             showTable1();
-            showTable2(); // Display updated tables after saving
+            showTable2();
         })
         .catch(error => console.error("Error saving data: ", error));
 }
 
-// Function to display data in Table 1
+// Display Table 1 (Firebase Data)
 function showTable1() {
-    dbcon.once("value", function (snapshot) {
+    dbcon.once("value", snapshot => {
         const data = snapshot.val();
+        console.log("Firebase Data:", data);
         const tbody = document.getElementById("ar2data");
         tbody.innerHTML = "";
         
-        if (!data) {
-            console.log("No data found in Firebase.");
-            return;
-        }
+        if (!data) return;
 
         for (let key in data) {
             const row = data[key];
             const tr = document.createElement("tr");
-
-            const name = document.createElement("td");
-            const breed = document.createElement("td");
-            const size = document.createElement("td");
-            const airlines = document.createElement("td");
-            const clouds = document.createElement("td");
-
-            name.textContent = row.Name || "N/A";
-            breed.textContent = row.Breed || "N/A";
-            size.textContent = row.Size || "N/A";
-            airlines.textContent = Array.isArray(row.Airlines) ? row.Airlines.join(", ") : "None";
-            clouds.textContent = row.Clouds || "N/A";
-
-            tr.appendChild(name);
-            tr.appendChild(breed);
-            tr.appendChild(size);
-            tr.appendChild(airlines);
-            tr.appendChild(clouds);
-
+            tr.innerHTML = `<td>${row.Name || "N/A"}</td><td>${row.Breed || "N/A"}</td><td>${row.Size || "N/A"}</td><td>${Array.isArray(row.Airlines) ? row.Airlines.join(", ") : "None"}</td><td>${row.Clouds || "N/A"}</td>`;
             tbody.appendChild(tr);
         }
     });
 }
 
-// Function to display recommendations in Table 2
+// Display Table 2 (Recommendations)
 function showTable2() {
     if (birdStrikesData.length === 0) {
         console.warn("Bird strike data not loaded yet. Retrying...");
-        setTimeout(showTable2, 1000); // Retry after 1 second
+        setTimeout(showTable2, 1000);
         return;
     }
 
-    dbcon.once("value", function (snapshot) {
+    dbcon.once("value", snapshot => {
         const data = snapshot.val();
         const tbody = document.getElementById("ar3data");
         tbody.innerHTML = "";
         
-        if (!data) {
-            console.log("No data found in Firebase.");
-            return;
-        }
+        if (!data) return;
 
         for (let key in data) {
             const row = data[key];
             const tr = document.createElement("tr");
-
-            const name = document.createElement("td");
-            const recommendations = document.createElement("td");
-
-            name.textContent = row.Name || "N/A";
-            recommendations.textContent = generateRecommendation(row.Breed, row.Size, row.Airlines, row.Clouds);
-
-            tr.appendChild(name);
-            tr.appendChild(recommendations);
-
+            tr.innerHTML = `<td>${row.Name || "N/A"}</td><td>${generateRecommendation(row.Breed, row.Size, row.Airlines, row.Clouds)}</td>`;
             tbody.appendChild(tr);
         }
     });
 }
 
-// Function to generate safety recommendations
+// Generate Recommendations
 function generateRecommendation(breed, size, airlines, clouds) {
-    if (!birdStrikesData || birdStrikesData.length === 0) {
-        return "Data not available";
-    }
-
-    if (!breed) {
-        return "Breed not specified.";
-    }
-
-    console.log("Searching for breed:", breed); // Log the breed being searched
+    if (!birdStrikesData.length) return "Data not available";
+    if (!breed || typeof breed !== "string") return "Breed not specified.";
 
     let relevantStrikes = birdStrikesData.filter(entry =>
-        entry.species && entry.species.trim().toLowerCase() === breed.trim().toLowerCase()
+        entry.species && typeof entry.species === "string" &&
+        entry.species.trim().toLowerCase().includes(breed.trim().toLowerCase())
     );
 
-    console.log("Relevant strikes:", relevantStrikes); // Log the filtered results
+    console.log("Searching for breed:", breed, "| Matches found:", relevantStrikes.length);
 
     if (relevantStrikes.length === 0) {
-        return "No known risk for this breed.";
+        return `No known risk for ${breed}.`;
     }
 
     relevantStrikes.sort((a, b) => b.strikes - a.strikes);
@@ -170,10 +124,11 @@ function generateRecommendation(breed, size, airlines, clouds) {
     return `Avoid: ${highRiskAirports.join(", ")} | Prefer: ${saferAirports.join(", ")}`;
 }
 
-// Use a single event listener for DOMContentLoaded
+// Run on page load
 document.addEventListener("DOMContentLoaded", () => {
     showTable1();
-    showTable2(); // Ensure both tables are displayed once the page is ready
+    showTable2();
 });
+
 
 
