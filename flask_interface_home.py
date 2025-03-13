@@ -24,7 +24,7 @@ def topnbirdsfunct(n):
 def generate_pie_chart(labels, data, title):
     plt.pie(data, labels=labels, autopct='%1.1f%%')
     plt.title(title)
-    plt.savefig("static/graph.png")
+    plt.savefig("graph.png")
     plt.close()
 
 # Function to process Firebase updates
