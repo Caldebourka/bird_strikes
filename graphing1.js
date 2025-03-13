@@ -1,4 +1,3 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDczW3d0RbphdiXQHzjS8rAQrUGNku0iYc",
   authDomain: "birds-2b89b.firebaseapp.com",
@@ -11,12 +10,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-// Retrieve the database handle
 const dbcon = firebase.database().ref('/GraphingInfo/');
-
-
-
 
 function displayChart() {
     let graph = document.getElementById("gph").value;
@@ -24,25 +18,23 @@ function displayChart() {
     let svgchart = document.getElementById("svgchart");
     let BirdInputBox = document.getElementById("bird_input-box");
     let CostInputBox = document.getElementById("cost_input-box");
-    let graphBox = document.getElementById("graphBox"); 
+    let graphBox = document.getElementById("graphBox");
 
-    // Hide all elements initially
     chart.style.display = "none";
     svgchart.style.display = "none";
     BirdInputBox.style.display = "none";
     CostInputBox.style.display = "none";
     if (graphBox) graphBox.style.display = "none";
 
-    // Display content based on the selected graph
     switch (graph) {
         case "choice":
             break;
         case "1":
-            fetch('/check_updates') // Call Flask to update the graph
+            fetch("https://your-flask-backend.com/check_updates") // Update with correct Flask URL
                 .then(response => response.json())
                 .then(() => {
                     chart.style.display = "block";
-                    chart.src = "static/graph.png?t=" + new Date().getTime(); // Updated graph
+                    chart.src = "static/graph.png?t=" + new Date().getTime(); // Force refresh
                     BirdInputBox.style.display = "block";
                     if (graphBox) graphBox.style.display = "block";
                 })
@@ -60,54 +52,18 @@ function displayChart() {
     }
 }
 
-
-let b_btn = document.getElementById("bird_n_btn");
-b_btn.addEventListener("click", bird_dataToFB);
-
-let c_btn = document.getElementById("cost_n_btn");
-c_btn.addEventListener("click", cost_dataToFB);
-
-function bird_dataToFB() {
+document.getElementById("bird_n_btn").addEventListener("click", function() {
     let n = document.getElementById("bird_n").value;
-	if (!isValidInteger(n)) {
+    if (!/^\d+$/.test(n)) {
         alert("Please enter a valid integer for n.");
         return;
     }
-    document.getElementById("bird_n").value = ""; 
-    
-	let fb_data = dbcon.child('birds').push();
-	
+    document.getElementById("bird_n").value = "";
+
+    let fb_data = dbcon.child("birds").push();
     fb_data.set({ n: n }).then(() => {
         console.log("Data sent to Firebase:", n);
-        
-        setTimeout(() => {
-            displayChart();
-        }, 500);
+        setTimeout(displayChart, 1500);
     });
+});
 
-    graphBox.style.display = "block";
-}
-function cost_dataToFB() {
-    let n = document.getElementById("cost_n").value;
-	if (!isValidInteger(n)) {
-        alert("Please enter a valid integer for n.");
-        return;
-    }
-    document.getElementById("cost_n").value = ""; 
-
-    let fb_data = dbcon.child('costs').push();
-    
-    fb_data.set({ n: n }).then(() => {
-        console.log("Data sent to Firebase:", n);
-        
-        setTimeout(() => {
-            displayChart();
-        }, 500);
-    });
-
-    graphBox.style.display = "block";
-}
-
-function isValidInteger(value) {
-    return /^\d+$/.test(value); // Ensures only whole numbers (no decimals, no negatives)
-}
