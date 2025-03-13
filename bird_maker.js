@@ -16,7 +16,7 @@ const dbcon = firebase.database().ref('/userBird/');
 
 let birdStrikesData = [];
 
-fetch('https://cors-anywhere.herokuapp.com/file:///path/to/your/bird_strikes.json')
+fetch('https://caldebourka.github.io/bird_strikes/')
     .then(response => response.json())
     .then(data => {
         birdStrikesData = data;
