@@ -41,16 +41,16 @@ function displayChart() {
             break; // No need to display anything
         case "1":
             chart.style.display = "block";
-            chart.src = "images/1.png?t=" + new Date().getTime(); // Force refresh
+            chart.src = "1.png?t=" + new Date().getTime(); // Force refresh
             BirdInputBox.style.display = "block";
             break;
         case "2":
             svgchart.style.display = "block";
-            svgchart.src = "images/Number of Strikes in Each State.svg?t=" + new Date().getTime();
+            svgchart.src = "Number of Strikes in Each State.svg?t=" + new Date().getTime();
             break;
         case "3":
             svgchart.style.display = "block";
-            svgchart.src = "images/Expensive_Strikes.svg"  ;
+            svgchart.src = "Expensive_Strikes.svg"  ;
             CostInputBox.style.display = "block";
             break;
     }
