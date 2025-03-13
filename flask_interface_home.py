@@ -40,7 +40,7 @@ def topnbirdsfunct(n, b, s):
 def generate_pie_chart(labels, data, title):
     plt.pie(data, labels=labels)
     plt.title(title)
-    plt.savefig("static/graph.png")
+    plt.savefig("1.png")
     plt.close()
 
 # 🔹 Track last processed value to avoid duplicates
@@ -57,7 +57,7 @@ def check_firebase():
                 last_n = latest_n
                 topnbreeds_lst, topnstrikes_lst = topnbirdsfunct(latest_n, breed_lst, csv_strike_lst)
                 generate_pie_chart(topnbreeds_lst, topnstrikes_lst, f"Top {latest_n} Birds in Strikes")
-                print(f"✅ Updated graph for top {latest_n} birds.")
+                print(f"Updated graph for top {latest_n} birds.")
         time.sleep(5)  # Wait 5 seconds before checking again
 
 # 🔹 Run Firebase checker in the background
