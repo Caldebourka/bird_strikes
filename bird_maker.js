@@ -16,7 +16,7 @@ const dbcon = firebase.database().ref('/userBird/');
 
 let birdStrikesData = [];
 
-fetch('https://caldebourka.github.io/bird_strikes/bird_strikes.json')
+fetch('bird_strikes.json')
     .then(response => response.json())
     .then(data => {
         birdStrikesData = data;
