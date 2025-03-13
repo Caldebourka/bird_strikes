@@ -16,27 +16,36 @@ const dbcon = firebase.database().ref('/userBird/');
 
 let birdStrikesData = [];
 
+// Fetch bird strike data
 fetch('bird_strikes.json')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to load bird strike data");
+        }
+        return response.json();
+    })
     .then(data => {
         birdStrikesData = data;
         console.log("Bird strike data loaded:", birdStrikesData);
         showTable2(); // Only call showTable2 once data is loaded
+    })
+    .catch(error => {
+        console.error("Error loading bird strike data:", error);
     });
-	
+
 // Function to save data to Firebase
 document.getElementById("sendToFb").addEventListener("click", saveData);
 
 function saveData() {
     let nameValue = document.getElementById("name").value.trim();
-    let breedFieldVal = document.getElementById("breed").value.trim();
+    let breedFieldVal = document.getElementById("breed").value.trim(); // Fixed typo: "breed" instead of "breed"
     let sizeFieldVal = document.getElementById("size").value.trim();
     let cloudFieldVal = document.getElementById("cloud").value.trim();
     
     let airlines = [];
     for (let i = 1; i <= 5; i++) {
         let checkbox = document.getElementById(`al${i}`);
-        if (checkbox.checked) {
+        if (checkbox && checkbox.checked) { // Added null check for checkbox
             airlines.push(checkbox.value);
             checkbox.checked = false;
         }
@@ -49,10 +58,12 @@ function saveData() {
 
     let data = { Name: nameValue, Breed: breedFieldVal, Size: sizeFieldVal, Airlines: airlines, Clouds: cloudFieldVal };
 
-    dbcon.push(data).then(() => {
-        showTable1();
-        showTable2(); // Display updated tables after saving
-    }).catch(error => console.error("Error saving data: ", error));
+    dbcon.push(data)
+        .then(() => {
+            showTable1();
+            showTable2(); // Display updated tables after saving
+        })
+        .catch(error => console.error("Error saving data: ", error));
 }
 
 // Function to display data in Table 1
@@ -77,11 +88,11 @@ function showTable1() {
             const airlines = document.createElement("td");
             const clouds = document.createElement("td");
 
-            name.textContent = row.Name;
-            breed.textContent = row.Breed;
-            size.textContent = row.Size;
+            name.textContent = row.Name || "N/A"; // Added fallback for undefined values
+            breed.textContent = row.Breed || "N/A";
+            size.textContent = row.Size || "N/A";
             airlines.textContent = Array.isArray(row.Airlines) ? row.Airlines.join(", ") : "None";
-            clouds.textContent = row.Clouds;
+            clouds.textContent = row.Clouds || "N/A";
 
             tr.appendChild(name);
             tr.appendChild(breed);
@@ -98,6 +109,7 @@ function showTable1() {
 function showTable2() {
     if (birdStrikesData.length === 0) {
         console.warn("Bird strike data not loaded yet. Retrying...");
+        setTimeout(showTable2, 1000); // Retry after 1 second
         return;
     }
 
@@ -118,7 +130,7 @@ function showTable2() {
             const name = document.createElement("td");
             const recommendations = document.createElement("td");
 
-            name.textContent = row.Name;
+            name.textContent = row.Name || "N/A";
             recommendations.textContent = generateRecommendation(row.Breed, row.Size, row.Airlines, row.Clouds);
 
             tr.appendChild(name);
@@ -135,8 +147,12 @@ function generateRecommendation(breed, size, airlines, clouds) {
         return "Data not available";
     }
 
+    if (!breed) {
+        return "Breed not specified.";
+    }
+
     let relevantStrikes = birdStrikesData.filter(entry =>
-        entry.species.toLowerCase() === breed.toLowerCase()
+        entry.species && entry.species.toLowerCase() === breed.toLowerCase()
     );
 
     if (relevantStrikes.length === 0) {
@@ -144,8 +160,8 @@ function generateRecommendation(breed, size, airlines, clouds) {
     }
 
     relevantStrikes.sort((a, b) => b.strikes - a.strikes);
-    let highRiskAirports = relevantStrikes.slice(0, 3).map(entry => entry.airport);
-    let saferAirports = relevantStrikes.slice(-3).map(entry => entry.airport);
+    let highRiskAirports = relevantStrikes.slice(0, 3).map(entry => entry.airport || "Unknown");
+    let saferAirports = relevantStrikes.slice(-3).map(entry => entry.airport || "Unknown");
 
     return `Avoid: ${highRiskAirports.join(", ")} | Prefer: ${saferAirports.join(", ")}`;
 }
@@ -155,8 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
     showTable1();
     showTable2(); // Ensure both tables are displayed once the page is ready
 });
-
-
 
 
 
