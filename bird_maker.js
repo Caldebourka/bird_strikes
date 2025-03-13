@@ -107,8 +107,8 @@ function generateRecommendation(breed, size, airlines, clouds) {
     if (!breed || typeof breed !== "string") return "Breed not specified.";
 
     let relevantStrikes = birdStrikesData.filter(entry =>
-        entry.species && typeof entry.species === "string" &&
-        entry.species.trim().toLowerCase().includes(breed.trim().toLowerCase())
+        entry.WildlifeSpecies && typeof entry.WildlifeSpecies === "string" &&
+        entry.WildlifeSpecies.trim().toLowerCase() === breed.trim().toLowerCase()
     );
 
     console.log("Searching for breed:", breed, "| Matches found:", relevantStrikes.length);
@@ -117,9 +117,9 @@ function generateRecommendation(breed, size, airlines, clouds) {
         return `No known risk for ${breed}.`;
     }
 
-    relevantStrikes.sort((a, b) => b.strikes - a.strikes);
-    let highRiskAirports = relevantStrikes.slice(0, 3).map(entry => entry.airport || "Unknown");
-    let saferAirports = relevantStrikes.slice(-3).map(entry => entry.airport || "Unknown");
+    relevantStrikes.sort((a, b) => b.Strikes - a.Strikes);
+    let highRiskAirports = relevantStrikes.slice(0, 3).map(entry => entry.AirportName || "Unknown");
+    let saferAirports = relevantStrikes.slice(-3).map(entry => entry.AirportName || "Unknown");
 
     return `Avoid: ${highRiskAirports.join(", ")} | Prefer: ${saferAirports.join(", ")}`;
 }
