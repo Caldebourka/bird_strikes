@@ -136,20 +136,31 @@ def pie(lab, data, title):
     #Add title
     plt.title(title)
     plt.tight_layout()
-    
+    plt.savefig(f'images/{title}.png')
     plt.show()
     plt.close()
     
     
+import matplotlib.pyplot as plt
+
 def bar(x, y, xlab, ylab, title):
+    plt.figure(figsize=(12, 6))  
     plt.bar(x, y)
+    
     plt.title(title)
     plt.xlabel(xlab)
-    plt.xticks(rotation=75)
     plt.ylabel(ylab)
     
-    plt.ticklabel_format(style='plain', axis='y')
+    plt.xticks(rotation=45, ha='right')  
+    plt.ticklabel_format(style='plain', axis='y')  
+    
+    plt.grid(axis='y', linestyle='--', alpha=0.7)  
+    plt.tight_layout()  
+    
+    plt.savefig(f'images/{title}.png')
     plt.show()
+    plt.close()
+
     
     
 
@@ -192,7 +203,7 @@ while graph in (1, 2, 3):
             for x in t:
                 temp_lst.append(x)
         topnbreeds_lst = temp_lst
-        pie(topnbreeds_lst, topnstrikes_lst, f'The top {n} most likely birds to be involved in a strike')
+        pie(topnbreeds_lst, topnstrikes_lst, f'top_{n}_breeds')
         break
     
     elif graph == 2:
@@ -200,7 +211,7 @@ while graph in (1, 2, 3):
         #state = list of state names sans repeats
         sortstate = sortstate(state_df)
         strikes_perstate = strikestate(sortstate, state_df, csv_strike_lst)
-        bar(sortstate, strikes_perstate, "State Names", "Total Strikes Per State", "Number of Strikes in Each State")
+        bar(sortstate, strikes_perstate, "State Names", "Total Strikes Per State", "Strikes_perState")
         
         graph = 0
     
@@ -222,7 +233,7 @@ while graph in (1, 2, 3):
         airline_costs = []
         for x in range(n):
             airline_costs.append(df_airline[topn_id_pos[x]])
-        bar(airline_costs, topn_cost_lst, "Airlines", "Costliest Strikes", "")
+        bar(airline_costs, topn_cost_lst, "Airlines", "Costliest Strikes", "Costliest_strikes")
         """
         #filtering -->> What aspects of each strike is the user interested in seeing?
         remark_lst = strk_data["Remarks"].tolist()
